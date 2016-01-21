@@ -239,7 +239,11 @@ public:
     QString lastTab() const { return m_lastTab; }
     void setLastTab(const QString &tab);
 
-    static QString serviceURL() { return QString("http://api-test.trafikanten.no"); }
+    static QString serviceURL()
+    {
+        //return QString("http://api-test.trafikanten.no");
+        return QString("http://reisapi.ruter.no");
+    }
 
     static QScriptEngine *getScriptEngine();
     static QNetworkAccessManager *getNetworkManager();
@@ -265,7 +269,7 @@ protected Q_SLOTS:
     void dataReceived();
 
 private:
-    QNetworkReply *createRequest(const QString &req);
+    QNetworkReply *sendRequest(const QString &req,const QString &strArgs);
 
     void updateRecentSearches();
     void saveRecentSearches();

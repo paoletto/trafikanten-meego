@@ -3,7 +3,7 @@
 #include <QtDeclarative>
 #include <QtCore/QTranslator>
 #include <QtCore/QtGlobal>
-#include <MDeclarativeCache>
+//#include <MDeclarativeCache>
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
@@ -11,8 +11,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QApplication::setOrganizationDomain("trafikanten.no");
     QApplication::setApplicationName("Trafikanten");
 
-    QApplication *app = MDeclarativeCache::qApplication(argc, argv);
-    QDeclarativeView *view = MDeclarativeCache::qDeclarativeView();
+//    QApplication *app = MDeclarativeCache::qApplication(argc, argv);
+//    QDeclarativeView *view = MDeclarativeCache::qDeclarativeView();
+    QScopedPointer<QApplication> app(new QApplication(argc, argv));
+    QScopedPointer<QDeclarativeView> view(new QDeclarativeView());
 
     QTranslator appTranslator;
     QString language = QLocale::system().name().left(2);

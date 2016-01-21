@@ -1,14 +1,23 @@
 .pragma library
 
-function jsonToDate(date) {
-    return new Date(parseInt(date));
+function jsonToDate(d) {
+    //return new Date(parseInt(date));
+    //return new Date(date);
+    return new Date( parseInt(d.slice(0,4))
+                    ,parseInt(d.slice(5,7))
+                    ,parseInt(d.slice(8,10))
+                    ,parseInt(d.slice(11,13))
+                    ,parseInt(d.slice(14,16))
+                    ,parseInt(d.slice(17,19)) )
 }
 
-function formatTrafDate(refDate, date) {
+function formatTrafDate(refDate, date)
+{
     var trafTime = jsonToDate(date);
     var currTime = jsonToDate(refDate);
     var diff = trafTime.getTime() - currTime.getTime();
     var diffSec = Math.round(diff / 1000);
+    //console.log(trafTime + " , " + currTime)
     if (diffSec < -1)
         return "";
     else if (diffSec < 45)

@@ -48,7 +48,7 @@ void Stop::processGetLines()
     int c =  list.count();
     for (int i = 0; i < c; ++i) {
         QVariantMap vm = list.at(i).toMap();
-        QString name = vm.value("LineName").toString().trimmed();
+        QString name = vm.value("Name").toString().trimmed();
         int transportation = vm.value("Transportation").toInt();
         m_lines.insert(name, transportation);
         switch (transportation) {
@@ -109,7 +109,15 @@ QNetworkAccessManager *TrafikantenAPI::getNetworkManager()
     return &m_manager;
 }
 
-QNetworkReply *TrafikantenAPI::createRequest(const QString &req)
+QUrl buildUrl(const QString &request, const QString &strArgs = "")
+{
+    if (!strArgs.length())
+        return QUrl(TrafikantenAPI::serviceURL() + request + QString("?json=true"));
+    else
+        return QUrl(TrafikantenAPI::serviceURL() + request + QString("?") + strArgs + QString("&json=true"));
+}
+
+QNetworkReply *TrafikantenAPI::sendRequest(const QString &req, const QString &strArgs = "")
 {
     m_waitingForData = true;
     emit waitingForDataChanged();
@@ -117,7 +125,8 @@ QNetworkReply *TrafikantenAPI::createRequest(const QString &req)
     delete m_reply;
     m_reply = 0;
     QNetworkRequest request;
-    request.setUrl(QUrl(serviceURL() + req));
+    //request.setUrl(QUrl(serviceURL() + req + "?json=true"));
+    request.setUrl(buildUrl(req, strArgs));
     QNetworkReply *reply = m_manager.get(request);
     connect(reply, SIGNAL(finished()), this, SLOT(dataReceived()));
     return reply;
@@ -144,12 +153,17 @@ void TrafikantenAPI::setRealTimeSearch(const QString &s)
         m_waitingForData = false;
         emit waitingForDataChanged();
     } else {
-        m_reply = createRequest("/RealTime/FindMatches/" + s.toLatin1());
+        //m_reply = createRequest("/RealTime/FindMatches/" + s.toLatin1());
+        QString strRequest = "/Place/GetPlaces/" + s.toLatin1();
+        //qDebug() << "Url: "<<buildUrl(strRequest);
+        m_reply = sendRequest(strRequest);
         connect(m_reply, SIGNAL(finished()), this, SLOT(processRealTimeSearchResult()));
     }
 
     emit realTimeSearchChanged();
 }
+
+
 
 void TrafikantenAPI::processRealTimeSearchResult()
 {
@@ -157,6 +171,7 @@ void TrafikantenAPI::processRealTimeSearchResult()
     m_engine->currentContext()->activationObject().setProperty("data", QScriptValue(data));
     QScriptValue result = m_engine->evaluate("JSON.parse(data)");
 
+    //qDebug() << "Data: " + data;
     m_stopCount = 0;
     m_realTimeSeachResult.clear();
     QVariantList list = result.toVariant().toList();
@@ -174,7 +189,7 @@ void TrafikantenAPI::processRealTimeSearchResult()
             ++m_stopCount;
             stop = new Stop(id, name, district, x, y);
 
-            QNetworkReply *reply = m_manager.get(QNetworkRequest(QUrl(serviceURL() + QString("/Place/GetLines/%1").arg(id))));
+            QNetworkReply *reply = m_manager.get(QNetworkRequest(  buildUrl(QString("/Line/GetLinesByStopID/%1").arg(id)) ));
             connect(reply, SIGNAL(finished()), stop, SLOT(processGetLines()));
             connect(reply, SIGNAL(finished()), this, SLOT(onStopGotLineInfo()));
         }
@@ -213,7 +228,8 @@ void TrafikantenAPI::setNearbySearch(const QPointF &loc)
     } else {
         UTMRef utm = latLongToUtm(loc);
         QPoint toInt = utm.position.toPoint();
-        m_reply = createRequest(QString("/Place/GetClosestStopsAdvancedByCoordinates/?coordinates=(X=%1,Y=%2)&proposals=10&walkingDistance=800").arg(toInt.x()).arg(toInt.y()));
+        //m_reply = sendRequest(QString("/Place/GetClosestStopsAdvancedByCoordinates/?coordinates=(X=%1,Y=%2)&proposals=10&walkingDistance=800").arg(toInt.x()).arg(toInt.y()));
+        m_reply = sendRequest(QString("/Place/GetClosestStops/"), QString("coordinates=(X=%1,Y=%2)&proposals=10&walkingDistance=800").arg(toInt.x()).arg(toInt.y()));
         connect(m_reply, SIGNAL(finished()), this, SLOT(processNearbySearchResult()));
     }
 
@@ -243,7 +259,7 @@ void TrafikantenAPI::processNearbySearchResult()
             ++m_stopCount;
             stop = new Stop(id, name, district, x, y);
 
-            QNetworkReply *reply = m_manager.get(QNetworkRequest(QUrl(serviceURL() + QString("/Place/GetLines/%1").arg(id))));
+            QNetworkReply *reply = m_manager.get(QNetworkRequest(buildUrl(QString("/Line/GetLinesByStopID/%1").arg(id))));
             connect(reply, SIGNAL(finished()), stop, SLOT(processGetLines()));
             connect(reply, SIGNAL(finished()), this, SLOT(onStopGotLineInfo()));
         }
@@ -273,7 +289,7 @@ void TrafikantenAPI::setRealTimeDataQuery(int id)
         m_waitingForData = false;
         emit waitingForDataChanged();
     } else {
-        m_reply = createRequest(QString("/RealTime/GetRealTimeData/%1").arg(id));
+        m_reply = sendRequest(QString("/StopVisit/GetDepartures/%1").arg(id));
         connect(m_reply, SIGNAL(finished()), this, SLOT(processRealTimeDataResult()));
     }
 
@@ -292,24 +308,33 @@ void TrafikantenAPI::processRealTimeDataResult()
     m_realTimeDataResult.clear();
     QVariantList list = result.toVariant().toList();
     int c =  list.count();
-    for (int i = 0; i < c; ++i) {
+    for (int i = 0; i < c; ++i)
+    {
         QVariantMap vm = list.at(i).toMap();
-        QString name = vm.value("PublishedLineName").toString().trimmed();
-        QString dest = vm.value("DestinationName").toString().trimmed();
-        QString platform = vm.value("DeparturePlatformName").toString().trimmed();
-        bool mon = vm.value("Monitored").toBool();
+        //qDebug() << vm;
         QString refTime = vm.value("RecordedAtTime").toString();
-        refTime = refTime.mid(6, refTime.indexOf("+") - 6);
-        QString time = vm.value("ExpectedDepartureTime").toString();
-        time = time.mid(6, time.indexOf("+") - 6);
+        QVariantMap vmData = vm.value("MonitoredVehicleJourney").toMap();
+        QString name = vmData.value("PublishedLineName").toString().trimmed();
+        QString dest = vmData.value("DestinationName").toString().trimmed();
+        QVariantMap vmDataMonitored = vmData.value("MonitoredCall").toMap();
+        QString platform = vmDataMonitored.value("DeparturePlatformName").toString().trimmed();
+        bool mon = vmData.value("Monitored").toBool();
 
-        RealTimeData *data = dynamic_cast<RealTimeData *>(m_realTimeDataResult.value(name + dest + platform));
+        //refTime = refTime.mid(11, refTime.indexOf("+") - 11);
+        refTime = refTime.mid(0, refTime.indexOf("+") );
+        QString time = vmDataMonitored.value("ExpectedDepartureTime").toString();
+        //time = time.mid(11, time.indexOf("+") - 11);
+        time = time.mid(0, time.indexOf("+") );
+        //qDebug() << refTime << " , "<<time;
+        QString strKey = name + dest + platform;
+        RealTimeData *data = dynamic_cast<RealTimeData *>(m_realTimeDataResult.value(strKey));
         if (!data) {
             Stop *stop = Stop::getCachedStop(m_realTimeDataQuery);
             data = new RealTimeData(m_realTimeDataQuery, "", name, dest, platform, stop->lineType(name));
-            m_realTimeDataResult.insert(name + dest + platform, data);
+            m_realTimeDataResult.insert(strKey, data);
         }
         data->addDepartureTime(new RealTimeDepartureData(mon, refTime, time));
+        //qDebug() << strKey << " += " + name + ","+ time;
     }
 
     emit realTimeDataResultChanged();
