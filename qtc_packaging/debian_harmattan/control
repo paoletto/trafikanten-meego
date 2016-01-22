@@ -1,4 +1,4 @@
-Source: trafikanten-yoannlopes
+Source: trafikanten-sanntid
 Section: user/other
 Priority: optional
 Maintainer: Yoann Lopes <yoann.lopes@gmail.com>
@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 5), libqt4-dev
 Standards-Version: 3.7.3
 Homepage:
 
-Package: trafikanten-yoannlopes
+Package: trafikanten-sanntid
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Real-time departures for public transports in Oslo area.

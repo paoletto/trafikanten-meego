@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import QtMobility.location 1.2
-import com.meego 1.0
+import com.nokia.meego 1.1
 import "utilities.js" as Utilities
 
 Item {

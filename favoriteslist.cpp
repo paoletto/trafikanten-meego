@@ -91,7 +91,7 @@ void FavoritesList::refreshData()
     emit waitingForDataChanged();
     for (int i = 0; i < count; ++i) {
         QNetworkRequest request;
-        QString req = QString("/RealTime/GetRealTimeData/%1").arg(ids.at(i));
+        QString req = QString("/StopVisit/GetDepartures/%1").arg(ids.at(i));
         request.setUrl(QUrl(TrafikantenAPI::serviceURL() + req));
         QNetworkReply *reply = TrafikantenAPI::getNetworkManager()->get(request);
         connect(reply, SIGNAL(finished()), this, SLOT(processReply()));
@@ -117,14 +117,16 @@ void FavoritesList::processReply()
     int c =  list.count();
     for (int i = 0; i < c; ++i) {
         QVariantMap vm = list.at(i).toMap();
-        QString name = vm.value("PublishedLineName").toString().trimmed();
-        QString dest = vm.value("DestinationName").toString().trimmed();
-        QString platform = vm.value("DeparturePlatformName").toString().trimmed();
-        bool mon = vm.value("Monitored").toBool();
         QString refTime = vm.value("RecordedAtTime").toString();
-        refTime = refTime.mid(6, refTime.indexOf("+") - 6);
-        QString time = vm.value("ExpectedDepartureTime").toString();
-        time = time.mid(6, time.indexOf("+") - 6);
+        QVariantMap vmData = vm.value("MonitoredVehicleJourney").toMap();
+        QString name = vmData.value("PublishedLineName").toString().trimmed();
+        QString dest = vmData.value("DestinationName").toString().trimmed();
+        QVariantMap vmDataMonitored = vmData.value("MonitoredCall").toMap();
+        QString platform = vmDataMonitored.value("DeparturePlatformName").toString().trimmed();
+        bool mon = vmData.value("Monitored").toBool();
+        refTime = refTime.mid(0, refTime.indexOf("+") );
+        QString time = vmDataMonitored.value("ExpectedDepartureTime").toString();
+        time = time.mid(0, time.indexOf("+") );
         RealTimeData *data = getFavorite(id, name, dest, platform);
         if (data)
             data->addDepartureTime(new RealTimeDepartureData(mon, refTime, time));

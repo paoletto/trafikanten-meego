@@ -1,5 +1,5 @@
 import QtQuick 1.1
-import com.meego 1.0
+import com.nokia.meego 1.1
 import "utilities.js" as Utilities
 
 Column {
@@ -115,10 +115,10 @@ Column {
                     Label {
                         height: timeview.height
                         font.bold: true
-                        color: "#285ab3"
+                        color: modelData.monitored ? "#285ab3" : "#FF9933"
                         verticalAlignment: Text.AlignTop
                         font.pixelSize: 22
-                        text: (modelData.monitored ? "" : "ca ") + (rawText == "0" ? qsTr("now") : rawText)
+                        text: (rawText == "0" ? qsTr("now") : rawText)   // (modelData.monitored ? "" : "ca ") + ...
                         property string rawText: Utilities.formatTrafDate(modelData.referenceTime, modelData.departureTime)
                     }
                 }
