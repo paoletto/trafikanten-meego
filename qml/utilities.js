@@ -3,12 +3,18 @@
 function jsonToDate(d) {
     //return new Date(parseInt(date));
     //return new Date(date);
-    return new Date( parseInt(d.slice(0,4))
-                    ,parseInt(d.slice(5,7))
-                    ,parseInt(d.slice(8,10))
-                    ,parseInt(d.slice(11,13))
-                    ,parseInt(d.slice(14,16))
-                    ,parseInt(d.slice(17,19)) )
+//    return new Date( parseInt(d.slice(0,4))
+//                    ,parseInt(d.slice(5,7))
+//                    ,parseInt(d.slice(8,10))
+//                    ,parseInt(d.slice(11,13))
+//                    ,parseInt(d.slice(14,16))
+//                    ,parseInt(d.slice(17,19)) )
+    return new Date( +(d.slice(0,4))
+                    ,+(d.slice(5,7))
+                    ,+(d.slice(8,10))
+                    ,+(d.slice(11,13))
+                    ,+(d.slice(14,16))
+                    ,+(d.slice(17,19)) )
 }
 
 function formatTrafDate(refDate, date)
