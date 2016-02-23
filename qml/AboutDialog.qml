@@ -81,7 +81,7 @@ Dialog {
 
             Column {
                 Label {
-                    text: qsTr("Version") + " 1.2.0"
+                    text: qsTr("Version") + " 1.6.0"
                     font.pixelSize: 22
                     color: genericDialog.platformStyle.commonLabelColor
                 }

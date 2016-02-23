@@ -1,14 +1,6 @@
 .pragma library
 
 function jsonToDate(d) {
-    //return new Date(parseInt(date));
-    //return new Date(date);
-//    return new Date( parseInt(d.slice(0,4))
-//                    ,parseInt(d.slice(5,7))
-//                    ,parseInt(d.slice(8,10))
-//                    ,parseInt(d.slice(11,13))
-//                    ,parseInt(d.slice(14,16))
-//                    ,parseInt(d.slice(17,19)) )
     return new Date( +(d.slice(0,4))
                     ,+(d.slice(5,7))
                     ,+(d.slice(8,10))
@@ -23,31 +15,72 @@ function formatTrafDate(refDate, date)
     var currTime = jsonToDate(refDate);
     var diff = trafTime.getTime() - currTime.getTime();
     var diffSec = Math.round(diff / 1000);
-    //console.log(trafTime + " , " + currTime)
+    var strTime = Qt.formatDateTime(trafTime, "hh:mm")
+    var strMins = ""
     if (diffSec < -1)
         return "";
     else if (diffSec < 45)
         return "0";
     else if (diffSec <= 105)
-        return "1 min";
+        strMins =   "1'";
     else if (diffSec <= 165)
-        return "2 min";
+        strMins =   "2'";
     else if (diffSec <= 225)
-        return "3 min";
+        strMins =   "3'";
     else if (diffSec <= 285)
-        return "4 min";
+        strMins =   "4'";
     else if (diffSec <= 345)
-        return "5 min";
+        strMins =   "5'";
     else if (diffSec <= 405)
-        return "6 min";
+        strMins =   "6'";
     else if (diffSec <= 465)
-        return "7 min";
+        strMins =   "7'";
     else if (diffSec <= 525)
-        return "8 min";
+        strMins =   "8'";
     else if (diffSec <= 585)
-        return "9 min";
+        strMins =   "9'";
     else
-        return Qt.formatDateTime(trafTime, "hh:mm");
+        return strTime;
+    return strMins + " (" + strTime + ")";
+}
+
+function trafTime(date)
+{
+    var trafTime = jsonToDate(date);
+    return Qt.formatDateTime(trafTime, "hh:mm");
+}
+
+function trafDiff(refDate, date)
+{
+    var trafTime = jsonToDate(date);
+    var currTime = jsonToDate(refDate);
+    var diff = trafTime.getTime() - currTime.getTime();
+    var diffSec = Math.round(diff / 1000);
+    if (diffSec < -1)
+        return "";
+    else if (diffSec < 45)
+        return "0";
+    else if (diffSec <= 105)
+        return "1";
+    else if (diffSec <= 165)
+        return "2";
+    else if (diffSec <= 225)
+        return "3";
+    else if (diffSec <= 285)
+        return "4";
+    else if (diffSec <= 345)
+        return "5";
+    else if (diffSec <= 405)
+        return "6";
+    else if (diffSec <= 465)
+        return "7";
+    else if (diffSec <= 525)
+        return "8";
+    else if (diffSec <= 585)
+        return "9";
+    else
+        return "";
+
 }
 
 function lTrim(value) {
