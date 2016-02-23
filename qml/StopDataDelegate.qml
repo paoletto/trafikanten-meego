@@ -135,7 +135,6 @@ Column {
                             verticalAlignment: Text.AlignBottom
                             font.pixelSize: ( strTrafDiff ? 16 : 22)
                             text: ( strTrafDiff ? ( strTrafDiff != "0" ? " ("+strTrafTime+")" : "") : strTrafTime )
-
                         }
                     }
                 }
