@@ -1,3 +1,15 @@
+trafikanten-sanntid (1.6.0) unstable; urgency=low
+
+  * Time formatting improvement
+
+ -- Paolo Angelelli <paoletto@gmail.com>  Tue, 23 Feb 2016 20:46:18 +0200
+
+trafikanten-sanntid (1.5.0) unstable; urgency=low
+
+  * JS bugfix
+
+ -- Paolo Angelelli <paoletto@gmail.com>  Tue, 26 Jan 2016 08:37:18 +0200
+
 trafikanten-sanntid (1.4.0) unstable; urgency=low
 
   * FavoritesView repaired too

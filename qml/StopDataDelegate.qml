@@ -112,14 +112,31 @@ Column {
 
                 model: modelData.departureTimes
                 delegate: Component {
-                    Label {
+                    Row {
                         height: timeview.height
-                        font.bold: true
-                        color: modelData.monitored ? "#285ab3" : "#FF9933"
-                        verticalAlignment: Text.AlignTop
-                        font.pixelSize: 22
-                        text: (rawText == "0" ? qsTr("now") : rawText)   // (modelData.monitored ? "" : "ca ") + ...
-                        property string rawText: Utilities.formatTrafDate(modelData.referenceTime, modelData.departureTime)
+                        anchors.top: parent.top
+                        spacing: 0
+                        property string strTrafTime: Utilities.trafTime(modelData.departureTime)
+                        property string strTrafDiff: Utilities.trafDiff(modelData.referenceTime, modelData.departureTime)
+                        Label {
+                            id: leftLabel
+                            height: timeview.height
+                            font.bold: true
+                            color: 'crimson'
+                            verticalAlignment: Text.AlignTop
+                            font.pixelSize: 22
+                            text: (strTrafDiff == "0" ? qsTr("now") : strTrafDiff+ (strTrafDiff ? "'": ""))   // (modelData.monitored ? "" : "ca ") + ...
+                        }
+                        Label {
+                            id: rightLabel
+                            height: timeview.height
+                            font.bold: true
+                            color: modelData.monitored ? "#285ab3" : "#FF9933"
+                            verticalAlignment: Text.AlignBottom
+                            font.pixelSize: ( strTrafDiff ? 16 : 22)
+                            text: ( strTrafDiff ? ( strTrafDiff != "0" ? " ("+strTrafTime+")" : "") : strTrafTime )
+
+                        }
                     }
                 }
             }
